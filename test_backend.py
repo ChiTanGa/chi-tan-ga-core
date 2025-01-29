@@ -1,10 +1,15 @@
 import logging
+import random
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from datetime import datetime
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 import asyncio
+import time
+import threading
 
 app = FastAPI()
 
@@ -15,7 +20,7 @@ logger = logging.getLogger(__name__)
 # Allow CORS for Vue.js frontend1
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # Replace with your Vue.js URL
+    allow_origins=["http://localhost:9000"],  # Replace with your Vue.js URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -31,46 +36,45 @@ class UserNameUpdate(BaseModel):
     new_name: str  # This should match the expected field name
 
 
-# WebSocket connection manager
-class ConnectionManager:
-    def __init__(self):
-        self.active_connections: list[WebSocket] = []
+app = FastAPI()
 
-    async def connect(self, websocket: WebSocket):
-        await websocket.accept()
-        self.active_connections.append(websocket)
-
-    def disconnect(self, websocket: WebSocket):
-        self.active_connections.remove(websocket)
-
-    async def broadcast(self, message: dict):
-        for connection in self.active_connections:
-            try:
-                await connection.send_json(message)
-            except WebSocketDisconnect:
-                self.disconnect(connection)
+#app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
-manager = ConnectionManager()
-
-
-@app.websocket("/ws/realtime")
-async def websocket_endpoint(websocket: WebSocket):
-    await manager.connect(websocket)
-    try:
-        while True:
-            # Broadcast real-time data every second
-            current_time = datetime.now()
-            uptime = current_time - start_time
-            message = {
-                "current_time": current_time.strftime("%Y-%m-%d %H:%M:%S"),
-                "uptime": str(uptime).split(".")[0],  # Uptime in HH:MM:SS
-                "user_name": user_name,
-            }
-            await manager.broadcast(message)
+async def dashboard_updates(websocket: WebSocket):
+    await websocket.accept()
+    while True:
+        try:
+            await websocket.send_json({"time": time.strftime("%Y-%m-%d %H:%M:%S")})
             await asyncio.sleep(1)
-    except WebSocketDisconnect:
-        manager.disconnect(websocket)
+        except WebSocketDisconnect:
+            break
+
+
+async def exchange_rate_updates(websocket: WebSocket):
+    await websocket.accept()
+    while True:
+        try:
+            # Replace this with actual exchange rate fetching logic
+            exchange_rate = {
+                "assetName": "BTC",
+                "exchangeRate": random.uniform(0.5, 1.2),
+                "timestamp": datetime.now().isoformat()
+            }
+            await websocket.send_json(exchange_rate)
+            await asyncio.sleep(15)
+        except WebSocketDisconnect:
+            break
+
+
+@app.websocket("/ws/dashboard")
+async def dashboard_endpoint(websocket: WebSocket):
+    await dashboard_updates(websocket)
+
+
+@app.websocket("/ws/exchangerates")
+async def exchange_rate_endpoint(websocket: WebSocket):
+    await exchange_rate_updates(websocket)
 
 
 @app.post("/update_user_name")
@@ -79,3 +83,21 @@ async def update_user_name(user_name_update: UserNameUpdate):
     user_name = user_name_update.new_name
     logger.info(f"User name updated to {user_name}")
     return {"message": "User name updated successfully"}
+
+
+# @app.get("/")
+# async def root():
+#    with open("index.html") as f:
+#        return HTMLResponse(content=f.read())
+
+
+# Run in separate threads for concurrency
+dashboard_thread = threading.Thread(target=asyncio.run, args=(dashboard_updates,))
+exchange_rate_thread = threading.Thread(target=asyncio.run, args=(exchange_rate_updates,))
+
+if __name__ == "__main__":
+    dashboard_thread.start()
+    exchange_rate_thread.start()
+    import uvicorn
+
+    uvicorn.run(app, host="0.0.0.0", port=8001)
