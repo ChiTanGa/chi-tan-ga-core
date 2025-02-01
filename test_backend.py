@@ -62,7 +62,7 @@ async def exchange_rate_updates(websocket: WebSocket):
                 "timestamp": datetime.now().isoformat()
             }
             await websocket.send_json(exchange_rate)
-            await asyncio.sleep(15)
+            await asyncio.sleep(5)
         except WebSocketDisconnect:
             break
 
