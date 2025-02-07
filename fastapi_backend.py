@@ -5,17 +5,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from datetime import datetime
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
 import asyncio
 import time
 import threading
 
+from pocket_options_consumer import exchange_rate_pocket_options_consumer
+
 app = FastAPI()
 
 # Set up logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('uvicorn.error')
 
 # Allow CORS for Vue.js frontend1
 app.add_middleware(
@@ -38,10 +37,11 @@ class UserNameUpdate(BaseModel):
 
 app = FastAPI()
 
-#app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
-async def dashboard_updates(websocket: WebSocket):
+async def dashboard_frontend_propagation(websocket: WebSocket):
     await websocket.accept()
     while True:
         try:
@@ -51,7 +51,7 @@ async def dashboard_updates(websocket: WebSocket):
             break
 
 
-async def exchange_rate_updates(websocket: WebSocket):
+async def exchange_rate_frontend_propagation(websocket: WebSocket):
     await websocket.accept()
     while True:
         try:
@@ -69,12 +69,12 @@ async def exchange_rate_updates(websocket: WebSocket):
 
 @app.websocket("/ws/dashboard")
 async def dashboard_endpoint(websocket: WebSocket):
-    await dashboard_updates(websocket)
+    await dashboard_frontend_propagation(websocket)
 
 
 @app.websocket("/ws/exchangerates")
 async def exchange_rate_endpoint(websocket: WebSocket):
-    await exchange_rate_updates(websocket)
+    await exchange_rate_frontend_propagation(websocket)
 
 
 @app.post("/update_user_name")
@@ -92,12 +92,18 @@ async def update_user_name(user_name_update: UserNameUpdate):
 
 
 # Run in separate threads for concurrency
-dashboard_thread = threading.Thread(target=asyncio.run, args=(dashboard_updates,))
-exchange_rate_thread = threading.Thread(target=asyncio.run, args=(exchange_rate_updates,))
+dashboard_propagation_thread = threading.Thread(target=asyncio.run, args=(dashboard_frontend_propagation,))
+exchange_rate_propagation_thread = threading.Thread(target=asyncio.run, args=(exchange_rate_frontend_propagation,))
+exchange_rate_consumer_thread = threading.Thread(target=asyncio.run, args=(exchange_rate_pocket_options_consumer,))
 
 if __name__ == "__main__":
-    dashboard_thread.start()
-    exchange_rate_thread.start()
+    logger.info("Starting backend threads.. ")
+    dashboard_propagation_thread.start()
+    exchange_rate_propagation_thread.start()
+    exchange_rate_consumer_thread.start()
+    logger.info("All backend threads initialized..")
+
     import uvicorn
 
+    logger.info("Starting uvicorn fast api backend.. ")
     uvicorn.run(app, host="0.0.0.0", port=8001)
