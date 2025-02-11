@@ -5,8 +5,6 @@ from pocketoptionapi import PocketOption
 import logging
 import os
 import argparse
-import curses
-import threading
 
 # Replace '/dev/tty.usbmodemXXXX' with the actual port name
 # You can find this in the Arduino IDE under Tools > Port

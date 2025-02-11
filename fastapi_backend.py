@@ -13,8 +13,9 @@ from pocket_options_consumer import exchange_rate_pocket_options_consumer
 
 app = FastAPI()
 
-# Set up logging
-logger = logging.getLogger('uvicorn.error')
+# Set up own logging (separated from uvicorn)
+logging.basicConfig(level=logging.INFO)  # Set the logging level
+logger = logging.getLogger(__name__)  # Use module-level logger
 
 # Allow CORS for Vue.js frontend1
 app.add_middleware(
@@ -61,6 +62,7 @@ async def exchange_rate_frontend_propagation(websocket: WebSocket):
                 "exchangeRate": random.uniform(0.5, 1.2),
                 "timestamp": datetime.now().isoformat()
             }
+            logger.info("Propagating exchange rates:")
             await websocket.send_json(exchange_rate)
             await asyncio.sleep(5)
         except WebSocketDisconnect:
@@ -92,14 +94,10 @@ async def update_user_name(user_name_update: UserNameUpdate):
 
 
 # Run in separate threads for concurrency
-dashboard_propagation_thread = threading.Thread(target=asyncio.run, args=(dashboard_frontend_propagation,))
-exchange_rate_propagation_thread = threading.Thread(target=asyncio.run, args=(exchange_rate_frontend_propagation,))
-exchange_rate_consumer_thread = threading.Thread(target=asyncio.run, args=(exchange_rate_pocket_options_consumer,))
+exchange_rate_consumer_thread = threading.Thread(target=asyncio.run, args=(exchange_rate_pocket_options_consumer(),))
 
 if __name__ == "__main__":
     logger.info("Starting backend threads.. ")
-    dashboard_propagation_thread.start()
-    exchange_rate_propagation_thread.start()
     exchange_rate_consumer_thread.start()
     logger.info("All backend threads initialized..")
 
