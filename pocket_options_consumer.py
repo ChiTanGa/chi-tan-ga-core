@@ -1,4 +1,5 @@
 import logging
+import queue
 import os
 import time
 from datetime import datetime
@@ -7,8 +8,12 @@ from pocketoptionapi import PocketOption
 
 logger = logging.getLogger(__name__)
 
+exchange_rate_queue2 = None
 
-async def exchange_rate_pocket_options_consumer():
+
+async def exchange_rate_pocket_options_consumer(exchange_rate_queue: queue.Queue):
+    exchange_rate_queue2 = exchange_rate_queue
+
     # Read SSID from env variable (or use dotenv to read from local files if you have more environments)
     ssid = os.getenv("SSID")
     if ssid is None:
@@ -45,3 +50,5 @@ async def exchange_rate_pocket_options_consumer():
 def exchange_rate_pocket_options_update_callback(_, message):
     timestamp = datetime.fromtimestamp(message[1])
     logger.info(f"Asset: {message[0]} Server time: {timestamp} Exchange rate: {message[2]}")
+    if exchange_rate_queue2 is not None:
+        exchange_rate_queue2.put(message)

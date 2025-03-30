@@ -1,5 +1,6 @@
 import logging
 import random
+import queue
 
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -12,6 +13,9 @@ import threading
 from pocket_options_consumer import exchange_rate_pocket_options_consumer
 
 app = FastAPI()
+
+exchange_rate_queue = queue.Queue()
+
 
 # Set up own logging (separated from uvicorn)
 logging.basicConfig(level=logging.INFO)  # Set the logging level
@@ -94,7 +98,7 @@ async def update_user_name(user_name_update: UserNameUpdate):
 
 
 # Run in separate threads for concurrency
-exchange_rate_consumer_thread = threading.Thread(target=asyncio.run, args=(exchange_rate_pocket_options_consumer(),))
+exchange_rate_consumer_thread = threading.Thread(target=asyncio.run, args=(exchange_rate_pocket_options_consumer(exchange_rate_queue),))
 
 if __name__ == "__main__":
     logger.info("Starting backend threads.. ")
