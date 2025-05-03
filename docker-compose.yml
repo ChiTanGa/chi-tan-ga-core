@@ -1,0 +1,48 @@
+services:
+  backend:
+    build: .
+    container_name: biofield-researchagent-backend
+    ports:
+      - "${BACKEND_PORT}:8000"
+    depends_on:
+      - mqtt
+      - minio
+      - timescale
+    networks:
+      - app-network
+
+  mqtt:
+    image: eclipse-mosquitto:latest
+    container_name: mqtt
+    ports:
+      - "${MQTT_PORT}:1883"
+    networks:
+      - app-network
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    ports:
+      - "${MINIO_PORT}:9000"
+    environment:
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+    volumes:
+      - ${MINIO_DATA}:/data
+    command: server /data
+    networks:
+      - app-network
+
+  timescale:
+    image: timescale/timescaledb-ha:pg17
+    container_name: timescale
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
