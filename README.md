@@ -1,18 +1,27 @@
-# BioFieldResearchAgent FastAPI Backend
+# Chi-Tan-Ga FastAPI Core
+
+## Development Configuration
+
+Copy the .env.template to .env.dev (default name referenced from Docker config) 
+And replace the variables with your settings
 
 ## Running all locally with docker
 ```
-APP_ENV_FILE=.env.dev
 docker compose --env-file .env.compose up
 ```
-## Debugging backend and running dependencies only with docker
-
+if you need rebuild Docker image of core:
+```
+docker compose --env-file .env.compose up --build
+```
+Note that the application environment variable file is linked inside of .env.compose file -> APP_ENV_FILE=.env.dev
+## Running dependencies only with docker
+This is useful for core debugging
 ```
 docker compose --env-file .env.compose up mqtt minio timescale
 ```
 
 Run the app/main.py in whatever python debugger you like,
-Dont forget to specify location of your application config:
+Don't forget to specify location of your application config:
 ```
 APP_ENV_FILE=.env.dev
 ```

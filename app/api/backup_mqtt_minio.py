@@ -8,7 +8,7 @@ import paho.mqtt.enums as mqtt_enums
 import threading
 from io import BytesIO
 from fastapi import APIRouter
-from backend.app.core import settings
+from app.core import settings
 
 logger = logging.getLogger(__name__)  # Use module-level logger
 

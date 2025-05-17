@@ -1,9 +1,11 @@
 services:
-  backend:
+  chi-tan-ga-core:
     build: .
-    container_name: biofield-researchagent-backend
+    container_name: chi-tan-ga-core
     ports:
       - "${BACKEND_PORT}:8000"
+    environment:
+      - APP_ENV_FILE=.env.dev
     depends_on:
       - mqtt
       - minio

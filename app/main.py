@@ -1,8 +1,8 @@
 import logging
 from fastapi import FastAPI
-import api
-from core import setup_logging
-from core import settings
+from app.api import backup_router
+from app.core import setup_logging
+from app.core import settings
 
 # Set up own logging (separated from uvicorn)
 setup_logging()
@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)  # Use module-level logger
 
 app = FastAPI()
 
-app.include_router(api.backup_router, prefix="/backup")
+app.include_router(backup_router, prefix="/backup")
 # Add other services like this:
 # app.include_router(items.router, prefix="/items")
 # app.include_router(auth.router, prefix="/auth")
