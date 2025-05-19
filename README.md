@@ -1,9 +1,9 @@
 # Chi-Tan-Ga FastAPI Core
 
-## Development Configuration
+## Development Configurations
 
-Copy the .env.template to .env.dev (default name referenced from Docker config) 
-And replace the variables with your settings
+The file .env.local.dev is used when running the core standalone (not within docker compose)
+The file .env.docker.dev is used when running the core within docker composer
 
 ## Running all locally with docker
 ```

@@ -5,7 +5,7 @@ services:
     ports:
       - "${BACKEND_PORT}:8000"
     environment:
-      - APP_ENV_FILE=.env.dev
+      - APP_ENV_FILE=.env.docker.dev
     depends_on:
       - mqtt
       - minio
@@ -25,7 +25,8 @@ services:
     image: minio/minio:latest
     container_name: minio
     ports:
-      - "${MINIO_PORT}:9000"
+      - "${MINIO_API_PORT}:9000"
+      - "${MINIO_WEB_ADMIN_PORT}:34679"
     environment:
       - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
       - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}

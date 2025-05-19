@@ -4,3 +4,6 @@ paho-mqtt
 msgpack-python
 minio
 pydantic-settings
+
+#Test only
+pytest
