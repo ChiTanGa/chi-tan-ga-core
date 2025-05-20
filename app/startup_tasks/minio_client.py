@@ -1,13 +1,13 @@
 from minio import Minio
 import logging
-from app.core import settings
+from app.core.config import Settings
 
 logger = logging.getLogger(__name__)  # Use module-level logger
 
 _minio_client = None
 
 
-def start_minio_client(test=False):
+def start_minio_client(settings: Settings):
     global _minio_client
     logger.info(f"Connecting to S3 Minio client: {settings.minio_endpoint}...")
     # Lazy init or test connection

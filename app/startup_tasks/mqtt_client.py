@@ -2,7 +2,8 @@ import logging
 import paho.mqtt.client as mqtt
 import paho.mqtt.enums as mqtt_enums
 import threading
-from app.core import settings
+
+from app.core.config import Settings
 from app.mqtt import create_on_mqtt_backup_message_handler
 from app.startup_tasks.minio_client import _minio_client as minio_client
 from typing import Optional
@@ -14,7 +15,7 @@ _mqtt_thread: Optional[threading.Thread] = None
 
 
 # MQTT setup
-def mqtt_listener():
+def mqtt_listener(settings: Settings):
     global _mqtt_client
     _mqtt_client = mqtt.Client(callback_api_version=mqtt_enums.CallbackAPIVersion.VERSION2)
     _mqtt_client.on_message = create_on_mqtt_backup_message_handler(minio_client)
@@ -27,10 +28,10 @@ def mqtt_listener():
     _mqtt_client.loop_forever()
 
 
-def start_mqtt_listener():
+def start_mqtt_listener(settings: Settings):
     # Background MQTT thread
     global _mqtt_thread
-    _mqtt_thread = threading.Thread(target=mqtt_listener, daemon=True)
+    _mqtt_thread = threading.Thread(target=mqtt_listener(settings=settings), daemon=True)
     _mqtt_thread.start()
 
 

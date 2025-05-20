@@ -14,8 +14,8 @@ logger = logging.getLogger(__name__)  # Use module-level logger
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    start_mqtt_listener()
-    start_minio_client()
+    start_mqtt_listener(settings=settings)
+    start_minio_client(settings=settings)
     yield
     exit_mqtt_listener()
 
