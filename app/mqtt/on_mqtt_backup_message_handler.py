@@ -3,14 +3,22 @@ import msgpack
 import json
 from datetime import datetime
 from io import BytesIO
+from minio import Minio
 from app.core import settings
-from app.startup_tasks import minio_client
 
 logger = logging.getLogger(__name__)  # Use module-level logger
 
 
+# Creates MQTT message handler with injected minio client dependency
+def create_on_mqtt_backup_message_handler(minio_client: Minio):
+    def handler(client, userdata, msg):
+        _on_mqtt_backup_message_handler(client, userdata, msg, minio_client)
+
+    return handler
+
+
 # MQTT handler
-def on_mqtt_backup_message_handler(client, userdata, msg):
+def _on_mqtt_backup_message_handler(client, userdata, msg, minio_client):
     try:
         print(f"Received message on topic: {msg.topic}")
         parts = msg.topic.strip("/").split("/")

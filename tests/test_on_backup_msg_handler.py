@@ -6,7 +6,7 @@ import threading
 from minio import Minio
 from paho.mqtt.client import Client as MqttClient
 
-from app.api import on_mqtt_backup_message_handler  # Adjust as needed
+from app.mqtt import on_mqtt_backup_message_handler
 from app.core import settings
 
 

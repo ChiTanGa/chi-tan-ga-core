@@ -3,7 +3,8 @@ import paho.mqtt.client as mqtt
 import paho.mqtt.enums as mqtt_enums
 import threading
 from app.core import settings
-from app.api import on_mqtt_backup_message_handler
+from app.mqtt import create_on_mqtt_backup_message_handler
+from app.startup_tasks.minio_client import _minio_client as minio_client
 from typing import Optional
 
 logger = logging.getLogger(__name__)  # Use module-level logger
@@ -16,7 +17,7 @@ _mqtt_thread: Optional[threading.Thread] = None
 def mqtt_listener():
     global _mqtt_client
     _mqtt_client = mqtt.Client(callback_api_version=mqtt_enums.CallbackAPIVersion.VERSION2)
-    _mqtt_client.on_message = on_mqtt_backup_message_handler
+    _mqtt_client.on_message = create_on_mqtt_backup_message_handler(minio_client)
     logger.info(f"Connecting to MQTT broker on {settings.mqtt_host}:{settings.mqtt_port} ...")
     _mqtt_client.connect(settings.mqtt_host, settings.mqtt_port)
     _mqtt_client.subscribe("/biofield-signal/+/+")
