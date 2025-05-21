@@ -10,7 +10,6 @@ _minio_client = None
 def start_minio_client(settings: Settings):
     global _minio_client
     logger.info(f"Connecting to S3 Minio client: {settings.minio_endpoint}...")
-    # Lazy init or test connection
     # MinIO client
     _minio_client = Minio(
         settings.minio_endpoint,
@@ -24,3 +23,4 @@ def start_minio_client(settings: Settings):
         _minio_client.make_bucket(settings.minio_bucket)
 
     logger.info("Successfully connected to S3 Minio client")
+    return _minio_client

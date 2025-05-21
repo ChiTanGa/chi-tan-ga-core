@@ -1,0 +1,24 @@
+version: '3.8'
+services:
+  mqtt:
+    image: eclipse-mosquitto:latest
+    ports:
+      - "1883:1883" # Expose dynamically for testing
+      - "9001" # Expose dynamically for websockets if needed
+    networks:
+      - app-network
+  minio:
+    image: minio/minio:latest
+    ports:
+      - "9000:9000" # S3 API
+      - "9001" # MinIO Console
+    environment:
+      MINIO_ROOT_USER: test
+      MINIO_ROOT_PASSWORD: test1234
+    command: server /data
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

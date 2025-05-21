@@ -7,3 +7,4 @@ pydantic-settings
 
 #Test only
 pytest
+pytest-docker
