@@ -2,6 +2,8 @@ services:
   chi-tan-ga-core:
     build: .
     container_name: chi-tan-ga-core
+    environment:
+      - APP_ENV_FILE=.app-env.docker.dev
     ports:
       - "${BACKEND_PORT}:8000"
     depends_on:
@@ -15,7 +17,7 @@ services:
     image: eclipse-mosquitto:latest
     container_name: mqtt
     ports:
-      - "${MQTT_PORT}:1883"
+      - "1883:${MQTT_PORT}"
     volumes:
       - ./docker-mosquitto.conf:/mosquitto/config/mosquitto.conf
     networks:
@@ -25,8 +27,8 @@ services:
     image: minio/minio:latest
     container_name: minio
     ports:
-      - "${MINIO_API_PORT}:9000"
-      - "${MINIO_WEB_ADMIN_PORT}:34679"
+      - "9000:${MINIO_API_PORT}"
+      - "34679:${MINIO_WEB_ADMIN_PORT}"
     environment:
       - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
       - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
@@ -42,7 +44,7 @@ services:
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     ports:
-      - "${POSTGRES_PORT}:5432"
+      - "5432:${POSTGRES_PORT}"
     networks:
       - app-network
 
