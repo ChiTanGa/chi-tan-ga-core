@@ -21,13 +21,15 @@ def create_on_mqtt_backup_message_handler(settings: Settings, minio_client: Mini
 # MQTT handler
 def _on_mqtt_backup_message_handler(client, userdata, msg, settings: Settings, minio_client: Minio):
     try:
-        print(f"Received message on topic: {msg.topic}")
+        logger.info(f"Received message on topic: {msg.topic}")
         parts = msg.topic.strip("/").split("/")
         if len(parts) != 3:
-            print("Invalid topic format.")
+            logger.error("Invalid topic format.")
             return
 
         _, device_name, sensor_name = parts
+
+        logger.info(f"Received data for {device_name}/{sensor_name}")
 
         # Unpack message with msgpack
         unpacked = msgpack.unpackb(msg.payload, raw=False)
@@ -62,7 +64,7 @@ def _on_mqtt_backup_message_handler(client, userdata, msg, settings: Settings, m
             content_type="application/octet-stream"
         )
 
-        print(f"Stored data for {device_name}/{sensor_name} at {time_path}")
+        logger.info(f"Stored data for {device_name}/{sensor_name} at {time_path}")
 
     except Exception as e:
-        print(f"Error processing MQTT message: {e}")
+        logger.error(f"Error processing MQTT message: {e}")

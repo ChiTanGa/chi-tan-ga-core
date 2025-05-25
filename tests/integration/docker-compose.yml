@@ -4,7 +4,8 @@ services:
     image: eclipse-mosquitto:latest
     ports:
       - "1883:1883" # Expose dynamically for testing
-      - "9001" # Expose dynamically for websockets if needed
+    volumes:
+      - ./docker-mosquitto.conf:/mosquitto/config/mosquitto.conf
     networks:
       - app-network
   minio:
