@@ -7,8 +7,9 @@ The file .app-env.docker.dev is used when running the core within docker compose
 
 ## Running all locally with docker
 ```
-docker compose --env-file .env.docker-compose up
+docker compose --env-file .env.docker-compose run -e APP_ENV_FILE=.app-env.docker.dev chi-tan-ga-core
 ```
+
 if you need rebuild Docker image of core:
 ```
 docker compose --env-file .env.docker-compose up --build

@@ -2,8 +2,6 @@ services:
   chi-tan-ga-core:
     build: .
     container_name: chi-tan-ga-core
-    environment:
-      - APP_ENV_FILE=.app-env.docker.dev
     ports:
       - "${BACKEND_PORT}:8000"
     depends_on:
