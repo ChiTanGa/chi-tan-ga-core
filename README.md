@@ -6,6 +6,7 @@ The file .app-env.local.dev is used when running the core standalone (not within
 The file .app-env.docker.dev is used when running the core within docker composer
 
 ## Running all locally with docker
+The following command will start the chi-tan-ga-core and all dependent services:
 ```
 docker compose --env-file .env.docker-compose run -e APP_ENV_FILE=.app-env.docker.dev chi-tan-ga-core
 ```
@@ -14,9 +15,8 @@ if you need rebuild Docker image of core:
 ```
 docker compose --env-file .env.docker-compose up --build
 ```
-Note that the application environment variable file is linked inside of .env.compose file -> APP_ENV_FILE=.env.dev
 ## Running dependencies only with docker
-This is useful for core debugging
+This is useful for core debugging, to execute dependent services only, and start core in python debug mode.
 ```
 docker compose --env-file .env.docker-compose up mqtt minio timescale
 ```
@@ -24,7 +24,7 @@ docker compose --env-file .env.docker-compose up mqtt minio timescale
 Run the app/main.py in whatever python debugger you like,
 Don't forget to specify location of your application config:
 ```
-APP_ENV_FILE=.env.dev
+APP_ENV_FILE=.app-env.local.dev
 ```
 
 ## Installation
